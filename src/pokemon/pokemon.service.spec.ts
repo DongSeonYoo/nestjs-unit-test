@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PokemonService } from './pokemon.service';
 import { HttpService } from '@nestjs/axios';
 import { DeepMocked, createMock } from '@golevelup/ts-jest';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 // describe('PokemonService', () => {
 //   let pokemonService: PokemonService;
@@ -78,5 +82,30 @@ describe('PokemonService with mocking', () => {
     const getPokemon = pokemonService.getPokemon(1);
 
     await expect(getPokemon).resolves.toBe('bulbasaur');
+  });
+
+  it('1보다 작은 포케몬 아이디를 입력했을 때 에러를 던진다', async () => {
+    const getPokemon = pokemonService.getPokemon(0);
+
+    await expect(getPokemon).rejects.toThrow(BadRequestException);
+  });
+
+  it('151보다 큰 포케몬 아이디를 입력했을 때 에러를 던진다', async () => {
+    const getPokemon = pokemonService.getPokemon(152);
+
+    await expect(getPokemon).rejects.toThrow(BadRequestException);
+  });
+
+  it('포케몬 아이디가 유효하지만 데이터가 오지 않았을 경우 500에러를 던진다', async () => {
+    httpService.axiosRef.mockResolvedValueOnce({
+      data: {},
+      headers: {},
+      config: { url: '' },
+      status: 200,
+      statusText: '',
+    });
+    const getPokemon = pokemonService.getPokemon(2);
+
+    await expect(getPokemon).rejects.toThrow(InternalServerErrorException);
   });
 });
