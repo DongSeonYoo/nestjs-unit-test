@@ -37,7 +37,7 @@ describe('TweetsService', () => {
 
       // when
       const tweet = () => {
-        return service.createTweet(payload);
+        service.createTweet(payload);
       };
 
       // then
